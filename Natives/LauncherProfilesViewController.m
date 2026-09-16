@@ -77,7 +77,13 @@ typedef NS_ENUM(NSUInteger, LauncherProfilesTableSection) {
     ]];
     self.createButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd menu:createMenu];
     if(@available(iOS 19.0, *)) {
-        self.createButtonItem.sharesBackground = NO;
+        // sharesBackground is only declared in iOS 26 SDK headers (Liquid
+        // Glass button grouping API). Set it via KVC so this still compiles
+        // against older SDKs that don't declare the property, while still
+        // working correctly at runtime on OS versions that support it.
+        if ([self.createButtonItem respondsToSelector:@selector(setSharesBackground:)]) {
+            [self.createButtonItem setValue:@NO forKey:@"sharesBackground"];
+        }
     }
 
     self.tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStyleInsetGrouped];
