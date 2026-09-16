@@ -655,7 +655,13 @@ static GameSurfaceView* pojavWindow;
 - (void)registerMouseCallbacks:(GCMouse *)mouse {
     NSLog(@"Input: Got mouse %@", mouse);
     mouse.mouseInput.mouseMovedHandler = ^(GCMouseInput * _Nonnull mouse, float deltaX, float deltaY) {
-        if (!self.view.window.windowScene.pointerLockState.locked) {
+        // NOTE: On some setups (observed with the always-attached-debugger JIT
+        // workaround required for TXM devices), UIKit never actually flips
+        // windowScene.pointerLockState.locked to true even though
+        // prefersPointerLocked correctly returns YES and clicks still work.
+        // Fall back to our own grab-intent flag so mouse-look still functions
+        // in that case, instead of silently dropping every delta.
+        if (!self.view.window.windowScene.pointerLockState.locked && !isGrabbing) {
             return;
         }
         [self sendTouchPoint:CGPointMake(deltaX, -deltaY) withEvent:ACTION_MOVE_MOTION];
