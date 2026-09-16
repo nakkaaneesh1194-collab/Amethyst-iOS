@@ -42,12 +42,12 @@ jobs:
           brew install cmake ldid wget
 
       - name: Install JDK 8 (BOOTJDK)
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '8'
-      # BOOTJDK is derived via `/usr/libexec/java_home -v 1.8` in the Makefile,
-      # which setup-java's temurin 8 install satisfies automatically.
+        run: |
+          brew install --cask temurin@8
+      # BOOTJDK is derived via `/usr/libexec/java_home -v 1.8` in the Makefile.
+      # actions/setup-java's version manifest no longer lists JDK 8, so we
+      # install it directly via Homebrew's cask instead, which registers it
+      # with /usr/libexec/java_home the same way a normal installer would.
       # --- End added steps ---
 
       - name: Get gl4es latest commit hash
