@@ -18,8 +18,8 @@ jobs:
         include:
           - platform: 2
             platform_name: ios
-    
-    runs-on: J316sAP
+
+    runs-on: macos-15
     steps:
       - name: Remove work folders
         run: |
@@ -29,12 +29,26 @@ jobs:
           rm -rf ./.??* || true
           echo "after"
           ls -lah ./
-          
+
       - name: Checkout repository
         uses: actions/checkout@main
 
       - name: Checkout repository submodules
         run: git submodule update --init --recursive
+
+      # --- Added: install tools the private runner already had pre-installed ---
+      - name: Install build tools (cmake, ldid, wget)
+        run: |
+          brew install cmake ldid wget
+
+      - name: Install JDK 8 (BOOTJDK)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+      # BOOTJDK is derived via `/usr/libexec/java_home -v 1.8` in the Makefile,
+      # which setup-java's temurin 8 install satisfies automatically.
+      # --- End added steps ---
 
       - name: Get gl4es latest commit hash
         id: gl4es-sha
@@ -70,7 +84,7 @@ jobs:
             -DCMAKE_C_FLAGS=-Wno-error=implicit-function-declaration
           cmake --build build --config RelWithDebInfo --target GL
           cp -R lib/libGL.dylib ../Natives/resources/Frameworks/libgl4es_114.dylib
-          
+
       - name: Push gl4es
         if: false && github.event != 'pull_request' && github.ref_name == 'main' && steps.gl4es-cache.outputs.cache-hit != 'true'
         continue-on-error: true
