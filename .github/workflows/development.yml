@@ -37,9 +37,9 @@ jobs:
         run: git submodule update --init --recursive
 
       # --- Added: install tools the private runner already had pre-installed ---
-      - name: Install build tools (cmake, ldid, wget)
+      - name: Install build tools (cmake, ldid, wget, gmake)
         run: |
-          brew install cmake ldid wget
+          brew install cmake ldid wget make
 
       - name: Install JDK 8 (BOOTJDK)
         run: |
